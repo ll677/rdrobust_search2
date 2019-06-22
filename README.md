@@ -1,18 +1,34 @@
+#TODO:
+* Write function to get URLs and filter out those which haven't been updated since they were last checked 
+* Change clone_repos to take URLs
+* change writes in rdrobustOccurrences; remove badRepos, add column to rdr_counts, write checked_URL
+
 # Instructions:
 1. Installations:
-    * install gitPython
-    * in command line/terminal, call: pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    * pip install gitpython
+    * pip install bitbucket-python
 
-2. Git clone the rdrobust_search repository
+2. Git clone the rdrobust_search2 repository
 3. Navigate to repository in command line/terminal, call python rdrobust_search.py
-4. Outputs:
-    1. rdr_counts.csv: column A contains DOIs of papers with code containing rdrobust, column B is number of appearance of rdrobust in the respective paper's code
-    2. badRepos.csv: a list of DOIs for which a repo could not be cloned
+4. Relevant data is output in rdr_counts.csv
 
 # Files:
 * rdrsrch_fxns.py: a module containing the functions necessary to run rdrobust_search
 * rdrobust_search.py: a script to output the report on rdrobust's frequency
 * rdrsrch_test.py: test script for rdrsrch_fxns.py
+* rdr_counts.csv: column A contains URLs of papers with code containing rdrobust, column B is number of appearance of rdrobust in the respective paper's code, column C is DOIs if extractable from the repo
+* checked_URL.csv: column A contains URL of checked repo, column B contains date of repo's last update
+
+# Script Outline
+1. Get list of URLs paired with last modified date
+    1. Generate bitbucket client using user input username and password
+    2. Get repository URLs from client
+    3. Filter out URLs of repositories that have already been checked and haven't been updated since the last run of the script
+2. Clone repos from URLs into a subdirectory
+    1. pass on repo objects paired with last modified date
+3. For each repo, parse its do and R files for rdrobust
+    1. If rdrobust occurs at least once, record URL, number of rdrobust occurrences, and DOI if extractable
+    2. Write outputs rdr_counts.csv and checked_URL.csv
 
 
 # OLD Script Outline
