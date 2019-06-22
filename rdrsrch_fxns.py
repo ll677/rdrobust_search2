@@ -13,6 +13,41 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+from bitbucket.client import Client
+def getURLs(username, password, owner):
+    """
+    Returns a list of tuples of bitbuckets URLs and last_updated time that we
+    want to clone. Also, generate a checked_URL.csv file that stores the URLs
+    and last_updated time for each URL. If last_updated time of a URL is before
+    the last modified time we got from bitbucket website, we append a tuple of
+    URL and last_modified time of that URL, otherwise we will just skip this URL
+    because we have already checked it before.
+
+    Example: TODO
+    """
+    tuple_list = []
+    df = pd.read_csv("checked_URL.csv")
+    checked_URLs= list(df['URL'])
+    checked_URLs_time = list(df['last_updated_time'])
+
+    client = Client(str(username), str(password), str(owner))
+    repos = client.get_repositories()['values']
+    for repo in repos:
+        links = repo['links']
+        clone = links['clone']
+        URL = clone[0]['href']
+        time = repo['updated_on']
+        if URL in checked_URLs:
+            index = checked_URLs.index(URL)
+            old_time = checked_URLs_time[index]
+            if old_time < time:
+                tuple = (URL, time)
+                tuple_list.append(tuple)
+        else:
+            tuple = (URL, time)
+            tuple_list.append(tuple)
+    return tuple_list
+
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
