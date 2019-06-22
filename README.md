@@ -1,4 +1,4 @@
-#TODO:
+# TODO:
 * Write function to get URLs and filter out those which haven't been updated since they were last checked 
 * Change clone_repos to take URLs
 * change writes in rdrobustOccurrences; remove badRepos, add column to rdr_counts, write checked_URL
