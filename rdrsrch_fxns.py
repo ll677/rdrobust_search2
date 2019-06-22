@@ -22,8 +22,10 @@ def getURLs(username, password, owner):
     the last modified time we got from bitbucket website, we append a tuple of
     URL and last_modified time of that URL, otherwise we will just skip this URL
     because we have already checked it before.
-
-    Example: TODO
+    Parameters:
+        username: email address to login to bitbucket
+        password: password to login to bit bitbucket
+        owner: owner of bitucket repo, i.e. aeaverification in this case
     """
     tuple_list = []
     df = pd.read_csv("checked_URL.csv")
