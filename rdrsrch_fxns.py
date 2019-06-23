@@ -4,7 +4,6 @@ import os
 import git
 import numpy as np
 import pandas as pd
-import glob
 import re
 
 import pickle
@@ -14,6 +13,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 from bitbucket.client import Client
+
 def getURLs(username, password, owner):
     """
     Returns a list of tuples of bitbuckets URLs and last_updated time that we
@@ -38,103 +38,36 @@ def getURLs(username, password, owner):
         links = repo['links']
         clone = links['clone']
         URL = clone[0]['href']
-        time = repo['updated_on']
+        time = repo['updated_on'] 
         if URL in checked_URLs:
             index = checked_URLs.index(URL)
             old_time = checked_URLs_time[index]
-            if old_time < time:
-                tuple = (URL, time)
-                tuple_list.append(tuple)
+            if old_time < time: #these are strings, not comparable values; needs correcting
+                tuple_list.append((URL, time))
         else:
-            tuple = (URL, time)
-            tuple_list.append(tuple)
+            tuple_list.append((URL, time))
     return tuple_list
 
-# If modifying these scopes, delete the file token.pickle.
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-
-# The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = '1pLxxyg01L-UkNpBWgP2xCRe7hIuUNw6e9BnVIqcO76c'
-SAMPLE_RANGE_NAME = 'MASTER Summer 2018 forward!A:A'
-
-def getDOIListGoogleSheet():
-    """
-    Get a List of DOIs from Replication_List spreadsheet.
-    """
-    DOIList = []
-    creds = None
-    # The file token.pickle stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', SCOPES)
-            creds = flow.run_local_server()
-        # Save the credentials for the next run
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
-
-    service = build('sheets', 'v4', credentials=creds)
-
-    # Call the Sheets API
-    sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                                range=SAMPLE_RANGE_NAME).execute()
-    values = result.get('values', [])
-
-    if not values:
-        print('No data found.')
-    else:
-        for row in values:
-            # Print columns A, which correspond to indices 0.
-            DOIList.append(row[0])
-            # print('%s' % (row[0]))
-    return DOIList[1:]
-
-
-
-def getDOIList():
-    """
-    Return DOIList from excel file
-    """
-    excel = pd.ExcelFile("Replication_List.xlsx")
-    excel = excel.parse("MASTER Summer 2018 forward")
-    doilist = list(excel['DOI'])
-    return doilist
-
-def cloneRepos(DOIList):
+def cloneRepos(URLs): #NEEDS UPDATING
 
     """
-    Clones the repos corresponding to the DOIs in DOIlist into the a subdirectory
-    named repos of the current working directory. Should require manual
-    login once. Assumes that the repos have URLs in following format:
-
-    https://bitbucket.org/aeaverification/<journal>-<DOI prefix>-<DOI suffix>.git
-
-    NOTE: most AER URLs in bitbucket appear "non-standard"; convention used is that given in wiki
+    Clones the repos corresponding to the links in URLs into the a subdirectory
+    named repos of the current working directory. May require manual login.
 
     Inputs:
 
-        DOIList: list of strings representing DOIs to check
-
-            NOTE: the DOIs MUST be in following format WITHOUT being
-            headed by "doi:" :
-
-            <prefix>/<suffix>
+        URLs: list of tuples; 0 index is a URL of a repo to clone, 1 index is string date
+            of its last update
 
     Returns:
 
-        repos: a dictionary indexing the elements of DOIlist to their repos
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
+            and last update time (1)
 
-        badRepos: a Series of strings representing DOIs for which a repo could not be pulled
+        
     """
+    
+    raise NotImplementedError
 
     jnames={'app':'aej-applied','mac':'aej-macro','mic':'aej-micro',
               'pol':'aej-policy','aer':'aer'}
@@ -200,20 +133,22 @@ def cloneRepos(DOIList):
     return (repos,pd.Series(badRepos))
 
 
-def rdrobustOccurrences(repos):
+def rdrobustOccurrences(repos): #NEEDS UPDATING
 
     """
     Input:
 
-        repos: a dictionary of repos indexed by their DOI strings
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
+            and last update time (1)
 
     Returns:
 
-        rdr_counts: A Series with indices as the DOIs containing rdrobust,
-            each indexing the number of occurrences of rdrobust in that DOI
+        new_counts: A pd.DataFrame (index are URLs, col 1 is DOI if extractable, col 2 is #
+            of rdrobust occurrences)
     """
 
-    # raise NotImplementedError
+    raise NotImplementedError
+
     DOIList = repos.keys()
     dic = {}
     for doi in DOIList:
@@ -226,17 +161,6 @@ def rdrobustOccurrences(repos):
             ct+=count_rdrobust(text)
         if ct>0:
             dic[doi]=ct
-
-    #     count = 0
-    #     r = repos[doi]
-    #     path = os.path.abspath(str(r))
-    #     lst_do = glob.glob(str(path)+"/*.do")
-    #     lst_R = glob.glob(str(path)+"/*.R")
-    #     if len(lst_do)>0 or len(lst_R)>0:
-    #         for do in lst_do:
-    #
-    #         count = len(lst_do) + len(lst_R)
-    #         dic[doi] = count
 
     rdr_counts= pd.Series(dic)
     return rdr_counts
@@ -277,12 +201,30 @@ def count_rdrobust(text):
     count=sum(1 for i in re.finditer('rdrobust',text))
     return count
 
-def series_to_csv(srs,filepath):
+def update_rdr_counts(new_counts):
+    
     """
+    Updates rdr_counts.csv in current working directory with info in new_counts. Includes
+    entries for new repos and replaces entries for old repos which have been modified.
+    
     Input:
-        srs: a Series with indices = doi strings and values = rdr_counts
-        filepath: path of the series output
-    Returns:
-        None. Generate a csv file.
+    
+        new_counts: A pd.DataFrame (index are URLs, col 1 is DOI if extractable, col 2 is #
+            of rdrobust occurrences)
+    
     """
-    srs.to_csv(filepath)
+    raise NotImplementedError
+    
+def update_checked_URL(repos)
+
+    """
+    Updates checked_URL.csv with the URLs and last modified date of repos examined in this
+    run of the script.
+    
+    Input:
+    
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
+            and last update time (1)
+
+    """
+    raise NotImplementedError
