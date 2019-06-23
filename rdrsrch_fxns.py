@@ -5,12 +5,7 @@ import git
 import numpy as np
 import pandas as pd
 import re
-
-import pickle
-import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+import datetime as dt
 
 from bitbucket.client import Client
 
@@ -38,15 +33,46 @@ def getURLs(username, password, owner):
         links = repo['links']
         clone = links['clone']
         URL = clone[0]['href']
-        time = repo['updated_on'] 
+        time = repo['updated_on'])
         if URL in checked_URLs:
             index = checked_URLs.index(URL)
             old_time = checked_URLs_time[index]
-            if old_time < time: #these are strings, not comparable values; needs correcting
+            if parseTime(old_time) < parseTime(time):
                 tuple_list.append((URL, time))
         else:
             tuple_list.append((URL, time))
     return tuple_list
+
+def parseTime(s):
+    
+    """
+    Input:
+    
+        s: a string representing a date and time in the form:
+            <YYYY>-<MM>-<DD>T<hh>:<mm>:<ss>.<ssssss>+00:00
+    
+    Returns:
+        
+        t: a datetime object representing the date and time given by s
+    """
+    
+    hyp1=s.find('-')
+    hyp2=s.find('-',hyp1+1)
+    Tpos=s.find('T')
+    col1=s.find(':')
+    col2=s.find(':',col1+1)
+    plus=s.find('+')
+    
+    year=int(s[:hyp1])
+    month=int(s[hyp1+1:hyp2])
+    day=int(s[hyp2+1:Tpos])
+    hour=int(s[Tpos+1:col1])
+    minute=int(s[col1+1:col2])
+    seconds=int(s[col2+1:plus])
+    
+    t=dt.datetime(year,month,day,hour,minute,seconds)
+    
+    return t
 
 def cloneRepos(URLs): #NEEDS UPDATING
 
@@ -69,13 +95,8 @@ def cloneRepos(URLs): #NEEDS UPDATING
     
     raise NotImplementedError
 
-    jnames={'app':'aej-applied','mac':'aej-macro','mic':'aej-micro',
-              'pol':'aej-policy','aer':'aer'}
-
     repos={}
-
-    badRepos=[]
-
+    
     #create and navigate to new directory repos
     try:
         os.mkdir('repos')
@@ -88,41 +109,11 @@ def cloneRepos(URLs): #NEEDS UPDATING
 
     #add repos to folder named repos
 
-    for doi in DOIList:
-        print('cloning'+str(doi))
-        a=doi.index('/')
-        b=doi.index('.',a)
-
-        #get prefix, suffix
-        pref=doi[:a]
-        suff=doi[a+1:]
-
-        #get journal
-        key=doi[a+1:b]
-        journal=jnames[key]
-
-        dirname='%s-%s-%s' % (journal, pref, suff)
-
-        URL='https://bitbucket.org/aeaverification/' + dirname + '.git'
-
-        try:
-
-            r=git.Repo.clone_from(URL,os.getcwd()+'\\'+dirname)
-            repos[doi]=r
-
-        except:
-
-            try:
-
-                journal='aej-'+key
-                dirname='%s-%s-%s' % (journal, pref, suff)
-                URL='https://bitbucket.org/aeaverification/' + dirname + '.git'
-                r=git.Repo.clone_from(URL,os.getcwd()+'\\'+dirname)
-                repos[doi]=r
-
-            except:
-
-                badRepos+=[doi]
+    for url in URLs:
+        print('cloning '+str(url))
+        
+        r=git.Repo.clone_from(url,os.getcwd()+'\\'+dirname)
+        repos[doi]=r
 
 
 
