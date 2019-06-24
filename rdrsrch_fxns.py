@@ -24,8 +24,13 @@ def getURLs(username, password, owner):
         username: email address to login to bitbucket
         password: password to login to bit bitbucket
         owner: owner of bitucket repo, i.e. aeaverification in this case
+        
+    Returns:
+    
+        URLs: dict; URLs of repos to clone index tuples, 0 index is string date
+            of last update, 1 index is string name of repo
     """
-    tuple_list = []
+    URLs={}
     df = pd.read_csv("checked_URL.csv")
     checked_URLs= list(df['URL'])
     checked_URLs_time = list(df['last_updated_time'])
@@ -48,15 +53,16 @@ def getURLs(username, password, owner):
         links = repo['links']
         clone = links['clone']
         URL = clone[0]['href']
-        time = repo['updated_on'])
+        upd = repo['updated_on'])
+        name = repo['name']
         if URL in checked_URLs:
             index = checked_URLs.index(URL)
-            old_time = checked_URLs_time[index]
-            if parseTime(old_time) < parseTime(time):
-                tuple_list.append((URL, time))
+            old_upd = checked_URLs_time[index]
+            if parseTime(old_time) < parseTime(upd):
+                URLs[URL]=(upd,name)
         else:
-            tuple_list.append((URL, time))
-    return tuple_list
+            URLs[URL]=(upd,name)
+    return URLs
 
 def parseTime(s):
     
@@ -97,19 +103,17 @@ def cloneRepos(URLs): #NEEDS UPDATING
 
     Inputs:
 
-        URLs: list of tuples; 0 index is a URL of a repo to clone, 1 index is string date
-            of its last update
+        URLs: dict; URLs of repos to clone index tuples, 0 index is string date
+            of last update, 1 index is string name of repo
 
     Returns:
 
-        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
-            and last update time (1)
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0),
+            last update time (1), and DOI if present (2) ('' if not present)
 
         
     """
     
-    raise NotImplementedError
-
     repos={}
     
     #create and navigate to new directory repos
@@ -124,19 +128,27 @@ def cloneRepos(URLs): #NEEDS UPDATING
 
     #add repos to folder named repos
 
-    for url in URLs:
+    for url in URLs.keys():
         print('cloning '+str(url))
+        upd=URLs[url][0]
+        name=URLs[url][1]
+        r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
         
-        r=git.Repo.clone_from(url,os.getcwd()+'\\'+dirname)
-        repos[doi]=r
-
-
+        #Try to get DOI
+        DOI=''
+        suffSt=name.find('10.1257-')+8
+        suffEnd=0
+        if suffLoc-8 >= 0:
+            for t in ['/','-','.git']:
+                SuffEnd=min(suffEnd,name.find(t,suffSt))
+            DOI='10.1257/'+name[suffSt,suffEnd]
+        repos[url]=(r,upd,DOI)
 
     #navigate back to original directory
 
     os.chdir(current_dir)
 
-    return (repos,pd.Series(badRepos))
+    return repos
 
 
 def rdrobustOccurrences(repos): #NEEDS UPDATING
