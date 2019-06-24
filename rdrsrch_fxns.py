@@ -2,15 +2,16 @@
 
 import os
 import git
-import numpy as np
+# import numpy as np
 import pandas as pd
 import re
 import datetime as dt
-import json
-import requests
-
+# import json
+# import requests
 
 from bitbucket.client import Client
+
+##### SCRIPT FUNCTIONS #####
 
 def getURLs(username, password, owner):
     """
@@ -64,38 +65,8 @@ def getURLs(username, password, owner):
             URLs[URL]=(upd,name)
     return URLs
 
-def parseTime(s):
-    
-    """
-    Input:
-    
-        s: a string representing a date and time in the form:
-            <YYYY>-<MM>-<DD>T<hh>:<mm>:<ss>.<ssssss>+00:00
-    
-    Returns:
-        
-        t: a datetime object representing the date and time given by s
-    """
-    
-    hyp1=s.find('-')
-    hyp2=s.find('-',hyp1+1)
-    Tpos=s.find('T')
-    col1=s.find(':')
-    col2=s.find(':',col1+1)
-    plus=s.find('+')
-    
-    year=int(s[:hyp1])
-    month=int(s[hyp1+1:hyp2])
-    day=int(s[hyp2+1:Tpos])
-    hour=int(s[Tpos+1:col1])
-    minute=int(s[col1+1:col2])
-    seconds=int(s[col2+1:plus])
-    
-    t=dt.datetime(year,month,day,hour,minute,seconds)
-    
-    return t
 
-def cloneRepos(URLs): #NEEDS UPDATING
+def cloneRepos(URLs): 
 
     """
     Clones the repos corresponding to the links in URLs into the a subdirectory
@@ -151,13 +122,13 @@ def cloneRepos(URLs): #NEEDS UPDATING
     return repos
 
 
-def rdrobustOccurrences(repos): #NEEDS UPDATING
+def rdrobustOccurrences(repos): 
 
     """
     Input:
 
-        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
-            and last update time (1)
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0),
+            last update time (1), and DOI if present (2) ('' if not present)
 
     Returns:
 
@@ -165,23 +136,93 @@ def rdrobustOccurrences(repos): #NEEDS UPDATING
             of rdrobust occurrences)
     """
 
-    raise NotImplementedError
-
-    DOIList = repos.keys()
-    dic = {}
-    for doi in DOIList:
+    new_counts=pd.DataFrame(index=pd.core.indexes.base.Index([],name='URL'),
+                            columns=['DOI','rdr_counts'])
+    URLs=repos.keys()
+    for url in URLs:
         ct=0
-        paths = getFilePaths(repos[doi].working_dir)
+        paths = getFilePaths(repos[url][0].working_dir)
         for f in paths:
             file=open(f,'r', errors='ignore')
             text=file.read()
             file.close()
             ct+=count_rdrobust(text)
         if ct>0:
-            dic[doi]=ct
+            new_counts.at[url]={'DOI':repos[url][2],'rdr_counts':ct}
+            
+    return new_counts
 
-    rdr_counts= pd.Series(dic)
-    return rdr_counts
+def update_rdr_counts(new_counts):
+    
+    """
+    Updates rdr_counts.csv in current working directory with info in new_counts. Includes
+    entries for new repos and replaces entries for old repos which have been modified.
+    
+    Input:
+    
+        new_counts: A pd.DataFrame (index are URLs, col 1 is DOI if extractable, col 2 is #
+            of rdrobust occurrences)
+    
+    """
+    old_counts=pd.read_csv('rdr_counts.csv',index_col='URL')
+    old_counts.update(new_counts[new_counts.index.isin(old_counts.index)])
+    rdr_counts=old_counts.append(new_counts[~new_counts.index.isin(old_counts.index)])
+    rdr_counts.to_csv('rdr_counts.csv')
+    
+    
+def update_checked_URL(repos):
+
+    """
+    Updates checked_URL.csv with the URLs and last modified date of repos examined in this
+    run of the script.
+    
+    Input:
+    
+        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0),
+            last update time (1), and DOI if present (2) ('' if not present)
+    """
+    checked_URL=pd.read_csv('checked_URL.csv',index_col='URL')
+    for url in repos.keys():
+        checked_URL.at[url]={'last_updated_time':repos[url][1]}
+    checked_URL.to_csv('checked_URL.csv')
+
+
+##### HELPER FUNCTIONS #####
+
+# getURLs helpers
+
+def parseTime(s):
+    
+    """
+    Input:
+    
+        s: a string representing a date and time in the form:
+            <YYYY>-<MM>-<DD>T<hh>:<mm>:<ss>.<ssssss>+00:00
+    
+    Returns:
+        
+        t: a datetime object representing the date and time given by s
+    """
+    
+    hyp1=s.find('-')
+    hyp2=s.find('-',hyp1+1)
+    Tpos=s.find('T')
+    col1=s.find(':')
+    col2=s.find(':',col1+1)
+    plus=s.find('+')
+    
+    year=int(s[:hyp1])
+    month=int(s[hyp1+1:hyp2])
+    day=int(s[hyp2+1:Tpos])
+    hour=int(s[Tpos+1:col1])
+    minute=int(s[col1+1:col2])
+    seconds=int(s[col2+1:plus])
+    
+    t=dt.datetime(year,month,day,hour,minute,seconds)
+    
+    return t
+
+# rdrobustOccurrences helpers
 
 def getFilePaths(dir):
 
@@ -218,31 +259,3 @@ def count_rdrobust(text):
 
     count=sum(1 for i in re.finditer('rdrobust',text))
     return count
-
-def update_rdr_counts(new_counts):
-    
-    """
-    Updates rdr_counts.csv in current working directory with info in new_counts. Includes
-    entries for new repos and replaces entries for old repos which have been modified.
-    
-    Input:
-    
-        new_counts: A pd.DataFrame (index are URLs, col 1 is DOI if extractable, col 2 is #
-            of rdrobust occurrences)
-    
-    """
-    raise NotImplementedError
-    
-def update_checked_URL(repos)
-
-    """
-    Updates checked_URL.csv with the URLs and last modified date of repos examined in this
-    run of the script.
-    
-    Input:
-    
-        repos: a dictionary indexing the repos' URLs to a tuple of their repo object (0)
-            and last update time (1)
-
-    """
-    raise NotImplementedError

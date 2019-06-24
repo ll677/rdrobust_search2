@@ -2,18 +2,16 @@
 #documenting usage of rdrobust in the do and R files of a certain set of DOIs
 
 import rdrsrch_fxns as rf
-
+import getpass as gp
 # DOIList=['10.1257/app.20160056',
 #              '10.1257/mac.20140181',
 #              '10.1257/mic.20160125',
 #              '10.1257/pol.20140391'] #testlist
 
-DOIList=rf.getDOIListGoogleSheet()
-# DOIList=rf.getDOIList()
-#print(DOIList)
-temp=rf.cloneRepos(DOIList)
-repos=temp[0]
-badRepos=temp[1]
-rdr_counts=rf.rdrobustOccurrences(repos)
-rf.series_to_csv(rdr_counts,'rdr_counts.csv')
-rf.series_to_csv(badRepos,'badRepos.csv')
+username=gp.getpass('Username:')
+password=gp.getpass('Password:')
+URLs=getURLs(username, password, 'aeaverification')
+repos=cloneRepos(URLs)
+new_counts=rdrobustOccurrences(repos)
+update_rdr_counts(new_counts)
+update_checked_URL(repos)
