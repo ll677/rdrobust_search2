@@ -6,6 +6,9 @@ import numpy as np
 import pandas as pd
 import re
 import datetime as dt
+import json
+import requests
+
 
 from bitbucket.client import Client
 
@@ -26,9 +29,21 @@ def getURLs(username, password, owner):
     df = pd.read_csv("checked_URL.csv")
     checked_URLs= list(df['URL'])
     checked_URLs_time = list(df['last_updated_time'])
-
     client = Client(str(username), str(password), str(owner))
-    repos = client.get_repositories()['values']
+    # repos = client.get_repositories()['values']
+    
+    # alt soln. here: https://thepythoncoding.blogspot.com/2019/06/python-script-to-clone-all-repositories.html?fbclid=IwAR0a-cI-EI9cA1cgQGkiXCY9R6-5SrJq_NItKurEQ59eSVnzGCVpmKtWs7g
+    
+    # compile repo list
+    pg=1
+    d=[0]
+    repos=[]
+    while len(d)>0:
+        d=client.get_repositories(params={'pagelen':100,'page':pg})['values']
+        repos=repos+d
+        pg+=1
+    
+    #get URLs
     for repo in repos:
         links = repo['links']
         clone = links['clone']
