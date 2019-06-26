@@ -54,15 +54,15 @@ def getURLs(username, password, owner):
         links = repo['links']
         clone = links['clone']
         URL = clone[0]['href']
-        upd_time = repo['updated_on'])
+        upd_time = repo['updated_on']
         name = repo['name']
         if URL in checked_URLs:
             index = checked_URLs.index(URL)
             old_time = checked_URLs_time[index]
             if parseTime(old_time) < parseTime(upd_time):
-                URLs[URL]=(upd,name)
+                URLs[URL]=(upd_time,name)
         else:
-            URLs[URL]=(upd,name)
+            URLs[URL]=(upd_time,name)
     return URLs
 
 
@@ -109,7 +109,8 @@ def cloneRepos(URLs):
         DOI=''
         suffSt=name.find('10.1257-')+8
         suffEnd=0
-        if suffLoc-8 >= 0:
+        # if suffLoc-8 >= 0:
+        if suffSt-8 >= 0:
             for t in ['/','-','.git']:
                 SuffEnd=min(suffEnd,name.find(t,suffSt))
             DOI='10.1257/'+name[suffSt,suffEnd]

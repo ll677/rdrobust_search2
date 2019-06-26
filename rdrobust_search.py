@@ -1,7 +1,7 @@
 #A script using the functions from the rdrsrch_fxns.py module to output a table
 #documenting usage of rdrobust in the do and R files of a certain set of DOIs
 
-import rdrsrch_fxns as rf
+from rdrsrch_fxns import *
 import getpass as gp
 # DOIList=['10.1257/app.20160056',
 #              '10.1257/mac.20140181',
