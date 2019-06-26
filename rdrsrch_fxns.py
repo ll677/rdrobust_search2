@@ -113,7 +113,7 @@ def cloneRepos(URLs):
         if suffSt-8 >= 0:
             for t in ['/','-','.git']:
                 SuffEnd=min(suffEnd,name.find(t,suffSt))
-            DOI='10.1257/'+name[suffSt,suffEnd]
+            DOI='10.1257/'+name[suffSt:suffEnd]
         repos[url]=(r,upd,DOI)
 
     #navigate back to original directory
