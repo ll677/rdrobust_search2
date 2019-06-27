@@ -1,14 +1,11 @@
 # TODO:
-* Test script functions and script
+* Re-test after recent debug of functions and script
 
 # Instructions:
-1. Installations:
-    * pip install gitpython
-    * pip install bitbucket-python
 
-2. Git clone the rdrobust_search2 repository
-3. Navigate to repository in command line/terminal, call python rdrobust_search.py
-4. Relevant data is output in rdr_counts.csv
+1. Git clone the rdrobust_search2 repository
+2. Navigate to repository in command line/terminal, call python rdrobust_search.py
+3. Relevant data is output in rdr_counts.csv
 
 # Files:
 * rdrsrch_fxns.py: a module containing the functions necessary to run rdrobust_search

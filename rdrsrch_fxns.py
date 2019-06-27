@@ -105,15 +105,8 @@ def cloneRepos(URLs):
         name=URLs[url][1]
         r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
 
-        #Try to get DOI
-        DOI=''
-        suffSt=name.find('10.1257-')+8
-        suffEnd=0
-        # if suffLoc-8 >= 0:
-        if suffSt-8 >= 0:
-            for t in ['/','-','.git']:
-                SuffEnd=min(suffEnd,name.find(t,suffSt))
-            DOI='10.1257/'+name[suffSt:suffEnd]
+        DOI=findDOI(name)
+        
         repos[url]=(r,upd,DOI)
 
     #navigate back to original directory
@@ -222,6 +215,36 @@ def parseTime(s):
     t=dt.datetime(year,month,day,hour,minute,seconds)
 
     return t
+
+# cloneRepos helper
+
+def findDOI(name):
+    """
+    Input:
+    
+        name: string representing name of a repo
+        
+    Returns:
+    
+        DOI: string of the repo's DOI if extractable, '' otherwise
+    """
+    DOI=''
+    prefEnd=name.find('10.1257')+7
+    
+    if prefEnd < 0:
+        return DOI
+    
+    import string
+    try:
+        suffSt=re.search(str(list(string.ascii_letters)),name[prefEnd:]).start()+prefEnd
+        suffEnd=name.find('-',suffSt)
+        if suffEnd < 0:
+            suffEnd=len(name)
+        DOI='10.1257/'+name[suffSt:suffEnd]
+        return DOI
+    except:
+        return DOI
+    
 
 # rdrobustOccurrences helpers
 
