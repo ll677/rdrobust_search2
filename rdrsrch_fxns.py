@@ -8,8 +8,9 @@ import re
 import datetime as dt
 # import json
 # import requests
-
+import shutil
 from bitbucket.client import Client
+
 
 ##### SCRIPT FUNCTIONS #####
 
@@ -103,11 +104,17 @@ def cloneRepos(URLs):
         print('cloning '+str(url))
         upd=URLs[url][0]
         name=URLs[url][1]
-        r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
-
         DOI=findDOI(name)
-        
-        repos[url]=(r,upd,DOI)
+        # shutil.rmtree(os.getcwd()+'\\'+name)
+        try:
+        	r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
+        	repos[url]=(r,upd,DOI)
+        except: 
+        	r = git.Repo(os.getcwd()+'\\'+name)
+        	o = r.remotes.origin
+        	o.pull()
+
+        	repos[url]=(r,upd,DOI)
 
     #navigate back to original directory
 
@@ -197,7 +204,7 @@ def parseTime(s):
 
         t: a datetime object representing the date and time given by s
     """
-
+    print(s)
     hyp1=s.find('-')
     hyp2=s.find('-',hyp1+1)
     Tpos=s.find('T')
@@ -210,10 +217,9 @@ def parseTime(s):
     day=int(s[hyp2+1:Tpos])
     hour=int(s[Tpos+1:col1])
     minute=int(s[col1+1:col2])
-    seconds=int(s[col2+1:plus])
+    seconds=int(float(s[col2+1:plus]))
 
     t=dt.datetime(year,month,day,hour,minute,seconds)
-
     return t
 
 # cloneRepos helper
