@@ -33,10 +33,12 @@ def getURLs(username, password, owner, redo=False):
             of last update, 1 index is string name of repo
     """
     URLs={}
+
     if not redo:
     	df = pd.read_csv("checked_URL.csv")
-   	else:
-   		df = pd.read_csv("checked_URL_empty.csv")
+   	# if redo:
+   	# 	df = pd.read_csv("checked_URL_empty.csv")
+
     checked_URLs= list(df['URL'])
     checked_URLs_time = list(df['last_updated_time'])
     client = Client(str(username), str(password), str(owner))
@@ -207,7 +209,7 @@ def parseTime(s):
 
         t: a datetime object representing the date and time given by s
     """
-    print(s)
+    # print(s)
     hyp1=s.find('-')
     hyp2=s.find('-',hyp1+1)
     Tpos=s.find('T')
