@@ -14,7 +14,7 @@ from bitbucket.client import Client
 
 ##### SCRIPT FUNCTIONS #####
 
-def getURLs(username, password, owner):
+def getURLs(username, password, owner, redo=False):
     """
     Returns a list of tuples of bitbuckets URLs and last_updated time that we
     want to clone. Also, generate a checked_URL.csv file that stores the URLs
@@ -26,14 +26,17 @@ def getURLs(username, password, owner):
         username: email address to login to bitbucket
         password: password to login to bit bitbucket
         owner: owner of bitucket repo, i.e. aeaverification in this case
-
+		redo: if True, then redo all URL repos cloning disregarding the checked_URLS.csv
     Returns:
 
         URLs: dict; URLs of repos to clone index tuples, 0 index is string date
             of last update, 1 index is string name of repo
     """
     URLs={}
-    df = pd.read_csv("checked_URL.csv")
+    if not redo:
+    	df = pd.read_csv("checked_URL.csv")
+   	else:
+   		df = pd.read_csv("checked_URL_empty.csv")
     checked_URLs= list(df['URL'])
     checked_URLs_time = list(df['last_updated_time'])
     client = Client(str(username), str(password), str(owner))
