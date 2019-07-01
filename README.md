@@ -1,8 +1,8 @@
 # Instructions:
 
 1. Git clone the rdrobust_search2 repository
-2. Navigate to repository in command line/terminal, call python rdrobust_search.py
-3. Relevant data is output in rdr_counts.csv
+2. Navigate to repository in command line/terminal, call python rdrobust_search.py (we only check new repos modified/added since last updated checked time)
+3. Relevant rdrobust occurence information is outputed as rdr_counts.csv, and updated time information of a URL is stored at checked_URL.csv
 
 # Files:
 * rdrsrch_fxns.py: a module containing the functions necessary to run rdrobust_search
@@ -11,7 +11,7 @@
 * rdr_counts.csv: column A contains URLs of papers with code containing rdrobust, column B is number of appearance of rdrobust in the respective paper's code, column C is DOIs if extractable from the repo
 * checked_URL.csv: column A contains URL of checked repo, column B contains date of repo's last update
 
-# Script Outline
+# NEW Script Outline (Using bitbucket API to get URLs)
 1. Get list of URLs paired with last modified date
     1. Generate bitbucket client using user input username and password
     2. Get repository URLs from client
@@ -23,7 +23,7 @@
     2. Write outputs rdr_counts.csv and checked_URL.csv
 
 
-# OLD Script Outline
+# OLD Script Outline (Using Google Spreadsheet API to get DOIs)
 1. Get DOIList as list of strings
     1. Change replication_list spreadsheet on google sheets to public
     2. Query the doi column and store as python list using google sheets API (based on code from [here](https://developers.google.com/sheets/api/quickstart/python))
