@@ -1,6 +1,3 @@
-# TODO:
-* Re-test after recent debug of functions and script
-
 # Instructions:
 
 1. Git clone the rdrobust_search2 repository
