@@ -1,8 +1,10 @@
 # Instructions:
 
 1. Git clone the rdrobust_search2 repository
-2. Navigate to repository in command line/terminal, call python rdrobust_search.py (we only check new repos modified/added since last updated checked time)
-3. Relevant rdrobust occurence information is outputed as rdr_counts.csv, and updated time information of a URL is stored at checked_URL.csv
+2. Navigate to repository in command line/terminal
+3. Install all necessary packages as per Requirement.md
+4. Call python rdrobust_search.py (we only check new repos modified/added since last updated checked time)
+5. Relevant rdrobust occurence information is outputed as rdr_counts.csv, and updated time information of URLs is stored at checked_URL.csv
 
 # Files:
 * rdrsrch_fxns.py: a module containing the functions necessary to run rdrobust_search
