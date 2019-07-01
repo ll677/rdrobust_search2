@@ -3,10 +3,6 @@
 
 from rdrsrch_fxns import *
 import getpass as gp
-# DOIList=['10.1257/app.20160056',
-#              '10.1257/mac.20140181',
-#              '10.1257/mic.20160125',
-#              '10.1257/pol.20140391'] #testlist
 
 username = gp.getpass('Username:')
 password = gp.getpass('Password:')

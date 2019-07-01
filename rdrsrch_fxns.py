@@ -2,12 +2,9 @@
 
 import os
 import git
-# import numpy as np
 import pandas as pd
 import re
 import datetime as dt
-# import json
-# import requests
 import shutil
 from bitbucket.client import Client
 
@@ -36,13 +33,10 @@ def getURLs(username, password, owner, redo=False):
 
     if not redo:
     	df = pd.read_csv("checked_URL.csv")
-   	# if redo:
-   	# 	df = pd.read_csv("checked_URL_empty.csv")
 
     checked_URLs= list(df['URL'])
     checked_URLs_time = list(df['last_updated_time'])
     client = Client(str(username), str(password), str(owner))
-    # repos = client.get_repositories()['values']
 
     # alt soln. here: https://thepythoncoding.blogspot.com/2019/06/python-script-to-clone-all-repositories.html?fbclid=IwAR0a-cI-EI9cA1cgQGkiXCY9R6-5SrJq_NItKurEQ59eSVnzGCVpmKtWs7g
 
@@ -56,6 +50,7 @@ def getURLs(username, password, owner, redo=False):
         pg+=1
 
     #get URLs
+
     for repo in repos:
         links = repo['links']
         clone = links['clone']
@@ -94,6 +89,7 @@ def cloneRepos(URLs):
     repos={}
 
     #create and navigate to new directory repos
+
     try:
         os.mkdir('repos')
     except FileExistsError:
@@ -110,15 +106,13 @@ def cloneRepos(URLs):
         upd=URLs[url][0]
         name=URLs[url][1]
         DOI=findDOI(name)
-        # shutil.rmtree(os.getcwd()+'\\'+name)
         try:
         	r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
         	repos[url]=(r,upd,DOI)
-        except: 
+        except:
         	r = git.Repo(os.getcwd()+'\\'+name)
         	o = r.remotes.origin
         	o.pull()
-
         	repos[url]=(r,upd,DOI)
 
     #navigate back to original directory
@@ -232,19 +226,19 @@ def parseTime(s):
 def findDOI(name):
     """
     Input:
-    
+
         name: string representing name of a repo
-        
+
     Returns:
-    
+
         DOI: string of the repo's DOI if extractable, '' otherwise
     """
     DOI=''
     prefEnd=name.find('10.1257')+7
-    
+
     if prefEnd < 0:
         return DOI
-    
+
     import string
     try:
         suffSt=re.search(str(list(string.ascii_letters)),name[prefEnd:]).start()+prefEnd
@@ -255,7 +249,7 @@ def findDOI(name):
         return DOI
     except:
         return DOI
-    
+
 
 # rdrobustOccurrences helpers
 
