@@ -30,7 +30,7 @@ def getURLs(username, password, owner, redo=False):
             of last update, 1 index is string name of repo
     """
     URLs={}
-
+# change to "checked_URL_empty.csv" if you want to start from fresh
     if not redo:
     	df = pd.read_csv("checked_URL.csv")
 
@@ -102,12 +102,12 @@ def cloneRepos(URLs):
     #add repos to folder named repos
 
     for raw_url in URLs.keys():
-        
+
         #remove user handle from url
         hst=raw_url.find('//')+2
         hend=raw_url.find('bitbucket.org')
         url=raw_url[:hst]+raw_url[hend:]
-        
+
         print('cloning '+str(url))
         upd=URLs[url][0]
         name=URLs[url][1]
@@ -154,7 +154,7 @@ def rdrobustOccurrences(repos):
             file.close()
             ct+=count_rdrobust(text)
         if ct>0:
-            
+
             new_counts.at[url]={'DOI':repos[url][2],'rdr_counts':ct}
 
     return new_counts
