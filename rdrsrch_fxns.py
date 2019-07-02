@@ -54,7 +54,13 @@ def getURLs(username, password, owner, redo=False):
     for repo in repos:
         links = repo['links']
         clone = links['clone']
-        URL = clone[0]['href']
+        raw_URL = clone[0]['href']
+        
+        #remove user handle from url
+        hst=raw_URL.find('//')+2
+        hend=raw_URL.find('bitbucket.org')
+        URL=raw_URL[:hst]+raw_URL[hend:]
+
         upd_time = repo['updated_on']
         name = repo['name']
         if URL in checked_URLs:
@@ -101,16 +107,11 @@ def cloneRepos(URLs):
 
     #add repos to folder named repos
 
-    for raw_url in URLs.keys():
-        
-        #remove user handle from url
-        hst=raw_url.find('//')+2
-        hend=raw_url.find('bitbucket.org')
-        url=raw_url[:hst]+raw_url[hend:]
-        
+    for url in URLs.keys():
+                
         print('cloning '+str(url))
-        upd=URLs[url][0]
-        name=URLs[url][1]
+        upd=URLs[raw_url][0]
+        name=URLs[raw_url][1]
         DOI=findDOI(name)
         try:
         	r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
