@@ -107,21 +107,11 @@ def cloneRepos(URLs):
 
     #add repos to folder named repos
 
-<<<<<<< HEAD
     for url in URLs.keys():
-                
-=======
-    for raw_url in URLs.keys():
 
-        #remove user handle from url
-        hst=raw_url.find('//')+2
-        hend=raw_url.find('bitbucket.org')
-        url=raw_url[:hst]+raw_url[hend:]
-
->>>>>>> 277475370c7de30dc77775a9f4df7efa274f9861
         print('cloning '+str(url))
-        upd=URLs[raw_url][0]
-        name=URLs[raw_url][1]
+        upd=URLs[url][0]
+        name=URLs[url][1]
         DOI=findDOI(name)
         try:
         	r=git.Repo.clone_from(url,os.getcwd()+'\\'+name)
