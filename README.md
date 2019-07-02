@@ -24,6 +24,8 @@
     1. If rdrobust occurs at least once, record URL, number of rdrobust occurrences, and DOI if extractable
     2. Write outputs rdr_counts.csv and checked_URL.csv
 
+# Notes:
+If you want to clone all the repos disregarding the checked_URL information, please change df = pd.read_csv("checked_URL.csv") around line 35 in rdrsrch_fxn.py to df = pd.read_csv("checked_URL_empty.csv"), delete the repos directory in your working space, and then rerun the code.
 
 # OLD Script Outline (Using Google Spreadsheet API to get DOIs)
 1. Get DOIList as list of strings
