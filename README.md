@@ -34,9 +34,9 @@ If you want to clone all the repos disregarding the checked_URL information, ple
 2. Pull the git repos
     1. Read list object of DOI strings; for each clone the repo into a subdirectory using gitPython
     2. Record DOIs that fail to clone in a pd.Series
-2. Parse the code, count occurrences of rdrobust by DOI
+3. Parse the code, count occurrences of rdrobust by DOI
     1. Generate accumulator pd.Series
     2. For each DOI, count number of rdrobust occurrences in do and R files; if nonzero, add to accumulator
-3. Print/return report
+4. Print/return report
     1. Export list of DOIs containing rdrobust and the frequency of rdrobust in the DOI as rdr_counts.csv
     2. Export list of DOIs which fail to clone in badRepos.csv
